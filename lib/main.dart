@@ -4,7 +4,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:frontend_lsbtranslator/utils/locator.dart';
 import 'package:frontend_lsbtranslator/controllers/app_state_controller.dart';
 import 'package:frontend_lsbtranslator/controllers/video_queue_controller.dart';
+import 'package:frontend_lsbtranslator/controllers/theme_controller.dart';
 import 'package:frontend_lsbtranslator/ui/screens/home_screen.dart';
+import 'package:frontend_lsbtranslator/ui/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +26,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => AppStateController()),
         ChangeNotifierProvider(create: (_) => VideoQueueController()),
+        ChangeNotifierProvider(create: (_) => ThemeController()),
       ],
       child: const LsbTranslatorApp(),
     ),
@@ -35,21 +38,17 @@ class LsbTranslatorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'LSB Traductor - Demo',
-      debugShowCheckedModeBanner: false, // Ocultar banner de debug para la demo
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        primaryColor: Colors.blueAccent,
-        scaffoldBackgroundColor: const Color(0xFF121212),
-        colorScheme: const ColorScheme.dark(
-          primary: Colors.blueAccent,
-          secondary: Colors.tealAccent,
-          surface: Color(0xFF1E1E1E),
-        ),
-        useMaterial3: true,
-      ),
-      home: const HomeScreen(),
+    return Consumer<ThemeController>(
+      builder: (context, themeController, child) {
+        return MaterialApp(
+          title: 'BankConnect LSB',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeController.themeMode,
+          home: const HomeScreen(),
+        );
+      },
     );
   }
 }
