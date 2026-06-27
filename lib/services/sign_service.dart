@@ -50,22 +50,24 @@ class SignService {
         final data = jsonDecode(response.body);
         if (data['success'] == true && data['clips'] != null) {
           // MAPEO BLINDADO A PRUEBA DE ERRORES
-          return (data['clips'] as List).map((clip) {
-            // 1. Limpiar la URL de comillas ocultas que causan el FormatException
+          final clips = (data['clips'] as List).map((clip) {
             final rawUrl = clip['videoUrl'] ?? '';
             final cleanUrl = rawUrl
                 .replaceAll('"', '')
                 .replaceAll("'", "")
                 .trim();
-            //print(response.body);
-            // 2. Construir el modelo tolerando diferencias del backend
             return SignClip(
               conceptId: clip['id'] ?? clip['conceptId'] ?? 'desconocido',
               videoUrl: cleanUrl,
-              // Fallback por si el back no manda el equivalente en texto
               textEquivalent: clip['text'] ?? clip['id'] ?? 'Señal',
             );
-          }).toList();
+          }).where((clip) => !clip.videoUrl.contains('ejemplo.com') && !clip.videoUrl.contains('fallback.mp4')).toList();
+          
+          if (clips.isNotEmpty) {
+            return clips;
+          } else {
+            throw Exception('El servidor devolvió enlaces inválidos o vacíos');
+          }
         }
       }
       // Si el servidor responde un error 500 o similar, forzamos caída al Plan Z
