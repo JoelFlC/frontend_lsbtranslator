@@ -1,14 +1,23 @@
 class SignClip {
   final String conceptId;
   final String videoUrl;
-  final String textEquivalent;
+  final String? textEquivalent;
 
   SignClip({
     required this.conceptId,
     required this.videoUrl,
-    required this.textEquivalent,
+    this.textEquivalent,
   });
 
   @override
-  String toString() => 'SignClip(conceptId: $conceptId, textEquivalent: $textEquivalent)';
+  String toString() =>
+      'SignClip(conceptId: $conceptId, textEquivalent: $textEquivalent)';
+  factory SignClip.fromJson(Map<String, dynamic> json) {
+    return SignClip(
+      conceptId: json['id'] as String? ?? 'sin_id',
+      videoUrl:
+          json['video_url'] as String? ?? json['videoUrl'] as String? ?? '',
+      textEquivalent: json['textEquivalent'] as String?,
+    );
+  }
 }

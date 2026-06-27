@@ -31,7 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
   # Captura de voz
-  speech_to_text: ^6.5.0
+  speech_to_text: ^7.0.0
   # Reproductor de video para las señas
   video_player: ^2.8.0
   # Conexión futura al orquestador

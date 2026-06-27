@@ -31,7 +31,10 @@ class TranslatorTab extends StatelessWidget {
     );
   }
 
-  Widget _buildCurrentView(BuildContext context, AppStateController controller) {
+  Widget _buildCurrentView(
+    BuildContext context,
+    AppStateController controller,
+  ) {
     // Si está en 'idle' o 'processing', mostramos la zona de entrada (o el spinner)
     if (controller.currentState == AppState.processing) {
       return const Center(
@@ -45,9 +48,11 @@ class TranslatorTab extends StatelessWidget {
         ),
       );
     }
-    
+
     if (controller.currentState == AppState.idle) {
-      return const TranslatorInputView();
+      return TranslatorInputView(
+        onSubmit: (text) => _handleProcessText(context, text),
+      );
     }
 
     // Si está en 'playing', mostramos el reproductor
