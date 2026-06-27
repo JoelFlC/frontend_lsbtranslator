@@ -237,24 +237,24 @@ class _TranslatorInputViewState extends State<TranslatorInputView> with SingleTi
             ),
             children: [
               QuickPhraseCard(
-                text: 'Buenos días, bienvenido.',
+                text: 'Buenos días, ¿cómo le puedo ayudar?',
                 icon: Icons.waving_hand_outlined,
-                onTap: () => _submitText('Buenos días, bienvenido.'),
+                onTap: () => _submitText('Buenos días, ¿cómo le puedo ayudar?'),
               ),
               QuickPhraseCard(
-                text: 'Tome asiento, por favor.',
-                icon: Icons.chair_alt_outlined,
-                onTap: () => _submitText('Tome asiento, por favor.'),
-              ),
-              QuickPhraseCard(
-                text: 'Diríjase al 2do piso.',
-                icon: Icons.elevator_outlined,
-                onTap: () => _submitText('Diríjase al 2do piso.'),
-              ),
-              QuickPhraseCard(
-                text: 'Su carnet de identidad.',
+                text: '¿Tiene su cédula de identidad?',
                 icon: Icons.badge_outlined,
-                onTap: () => _submitText('Su carnet de identidad, por favor.'),
+                onTap: () => _submitText('¿Tiene su cédula de identidad?'),
+              ),
+              QuickPhraseCard(
+                text: 'Por favor espere su turno.',
+                icon: Icons.access_time,
+                onTap: () => _submitText('Por favor espere su turno.'),
+              ),
+              QuickPhraseCard(
+                text: 'Por favor firme aquí.',
+                icon: Icons.draw_outlined,
+                onTap: () => _submitText('Por favor firme aquí.'),
               ),
             ],
           ),
