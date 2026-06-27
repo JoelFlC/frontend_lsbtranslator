@@ -63,7 +63,7 @@ class SignService {
               conceptId: clip['id'] ?? clip['conceptId'] ?? 'desconocido',
               videoUrl: cleanUrl,
               // Fallback por si el back no manda el equivalente en texto
-              textEquivalent: clip['textEquivalent'] ?? clip['id'] ?? 'Señal',
+              textEquivalent: clip['text'] ?? clip['id'] ?? 'Señal',
             );
           }).toList();
         }
