@@ -20,11 +20,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<VideoQueueController>().onSequenceCompleted = () {
-        context.read<AppStateController>().setIdle();
-      };
-    });
+    // Ya no seteamos idle al terminar la secuencia, para que el video
+    // se quede estático al final y el usuario pueda salir con la "X".
   }
 
   @override

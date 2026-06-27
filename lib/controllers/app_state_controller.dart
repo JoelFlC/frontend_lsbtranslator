@@ -9,12 +9,14 @@ class AppStateController extends ChangeNotifier {
   AppState _currentState = AppState.idle;
   String _currentText = "";
   List<SignClip> _currentClips = [];
-
+  final List<String> _history = [];
+  
   final SignService _signService = locator<SignService>();
 
   AppState get currentState => _currentState;
   String get currentText => _currentText;
   List<SignClip> get currentClips => _currentClips;
+  List<String> get history => _history;
 
   void setIdle() {
     _currentState = AppState.idle;
@@ -35,9 +37,20 @@ class AppStateController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _addToHistory(String text) {
+    if (_history.contains(text)) {
+      _history.remove(text);
+    }
+    _history.insert(0, text);
+    if (_history.length > 3) {
+      _history.removeLast();
+    }
+  }
+
   Future<void> processText(String text) async {
     if (text.trim().isEmpty) return;
 
+    _addToHistory(text);
     _setProcessing(text);
 
     try {

@@ -3,8 +3,15 @@ import 'package:provider/provider.dart';
 import 'package:frontend_lsbtranslator/controllers/app_state_controller.dart';
 import 'package:frontend_lsbtranslator/controllers/video_queue_controller.dart';
 
-class HistoryTab extends StatelessWidget {
+class HistoryTab extends StatefulWidget {
   const HistoryTab({super.key});
+
+  @override
+  State<HistoryTab> createState() => _HistoryTabState();
+}
+
+class _HistoryTabState extends State<HistoryTab> {
+  String _searchQuery = '';
 
   void _playPhrase(BuildContext context, String text) async {
     final appState = context.read<AppStateController>();
@@ -20,7 +27,28 @@ class HistoryTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final history = context.watch<AppStateController>().history;
     
+    // Lista temporal para demostración del buscador, en una app real podrían venir del modelo
+    final allPhrases = [
+      '¿Tiene su cédula de identidad?',
+      'Su documento está incompleto.',
+      'Necesita una fotocopia.',
+      'Por favor firme aquí.',
+      'Su saldo es insuficiente.',
+      '¿Cuál es su monto?',
+      'Buenos días, ¿cómo le puedo ayudar?',
+      'Muchas gracias, hasta luego.',
+      'Por favor espere su turno.',
+      'Por favor tome asiento.',
+      'Venir a la ventanilla.',
+    ];
+    
+    final isSearching = _searchQuery.trim().isNotEmpty;
+    final searchResults = allPhrases
+        .where((p) => p.toLowerCase().contains(_searchQuery.toLowerCase()))
+        .toList();
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
       child: Column(
@@ -28,6 +56,7 @@ class HistoryTab extends StatelessWidget {
         children: [
           // Search Bar
           TextField(
+            onChanged: (val) => setState(() => _searchQuery = val),
             decoration: InputDecoration(
               hintText: 'Buscar frases o historial...',
               prefixIcon: Icon(Icons.search, color: colorScheme.onSurfaceVariant),
@@ -35,18 +64,42 @@ class HistoryTab extends StatelessWidget {
           ),
           const SizedBox(height: 32),
 
-          // Historial Reciente
-          const _SectionHeader(title: 'Historial Reciente'),
-          const SizedBox(height: 16),
-          _PhraseItem(
-            text: '¿Me puede dar su número de cuenta?',
-            onPlay: () => _playPhrase(context, '¿Me puede dar su número de cuenta?'),
-          ),
-          const SizedBox(height: 8),
-          _PhraseItem(
-            text: 'El trámite demora 24 horas.',
-            onPlay: () => _playPhrase(context, 'El trámite demora 24 horas.'),
-          ),
+          // Historial Reciente (Solo si no estamos buscando)
+          if (!isSearching) ...[
+            const _SectionHeader(title: 'Historial Reciente'),
+            const SizedBox(height: 16),
+            if (history.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Text('No hay historial reciente.'),
+              ),
+            for (final phrase in history) ...[
+              _PhraseItem(
+                text: phrase,
+                onPlay: () => _playPhrase(context, phrase),
+              ),
+              const SizedBox(height: 8),
+            ],
+            const SizedBox(height: 32),
+          ],
+          
+          // Resultados de búsqueda
+          if (isSearching) ...[
+            const _SectionHeader(title: 'Resultados'),
+            const SizedBox(height: 16),
+            if (searchResults.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Text('No se encontraron resultados.'),
+              ),
+            for (final phrase in searchResults) ...[
+              _PhraseItem(
+                text: phrase,
+                onPlay: () => _playPhrase(context, phrase),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ] else ...[
 
           const SizedBox(height: 32),
 
@@ -195,6 +248,7 @@ class HistoryTab extends StatelessWidget {
           ),
           
           const SizedBox(height: 32),
+          ],
         ],
       ),
     );

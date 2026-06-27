@@ -12,7 +12,6 @@ class SettingsTab extends StatefulWidget {
 
 class _SettingsTabState extends State<SettingsTab> {
   double _speedValue = 1.0;
-  bool _autoPlayVoice = true;
 
   @override
   Widget build(BuildContext context) {
@@ -50,14 +49,14 @@ class _SettingsTabState extends State<SettingsTab> {
                       Icon(Icons.speed, color: Theme.of(context).colorScheme.secondary),
                       const SizedBox(width: 12),
                       Text(
-                        'Translation Speed',
+                        'Velocidad de Traducción',
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                     ],
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Adjust the signing speed of the avatar.',
+                    'Ajusta la velocidad de las señas en el video.',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -69,7 +68,7 @@ class _SettingsTabState extends State<SettingsTab> {
                         children: [
                           Icon(Icons.text_fields, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
                           const SizedBox(height: 4),
-                          Text('Slow', style: Theme.of(context).textTheme.labelSmall),
+                          Text('Lento', style: Theme.of(context).textTheme.labelSmall),
                         ],
                       ),
                       Expanded(
@@ -98,7 +97,7 @@ class _SettingsTabState extends State<SettingsTab> {
                         children: [
                           Icon(Icons.cruelty_free, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
                           const SizedBox(height: 4),
-                          Text('Fast', style: Theme.of(context).textTheme.labelSmall),
+                          Text('Rápido', style: Theme.of(context).textTheme.labelSmall),
                         ],
                       ),
                     ],
@@ -120,40 +119,6 @@ class _SettingsTabState extends State<SettingsTab> {
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 children: [
-                  // Auto-play voice
-                  Row(
-                    children: [
-                      Icon(Icons.volume_up_outlined, color: Theme.of(context).colorScheme.secondary),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Auto-play voice', style: Theme.of(context).textTheme.titleMedium),
-                            Text(
-                              'Read translated text aloud automatically',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Switch(
-                        value: _autoPlayVoice,
-                        activeTrackColor: Theme.of(context).colorScheme.primary,
-                        onChanged: (value) {
-                          setState(() {
-                            _autoPlayVoice = value;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Divider(color: Theme.of(context).colorScheme.surfaceContainerHighest, height: 1),
-                  const SizedBox(height: 16),
                   // Dark Mode
                   Consumer<ThemeController>(
                     builder: (context, themeController, child) {
@@ -165,9 +130,9 @@ class _SettingsTabState extends State<SettingsTab> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Dark Mode', style: Theme.of(context).textTheme.titleMedium),
+                                Text('Modo Oscuro', style: Theme.of(context).textTheme.titleMedium),
                                 Text(
-                                  'Switch to high-contrast theme',
+                                  'Cambiar a tema de alto contraste',
                                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                                     fontSize: 14,
@@ -195,32 +160,19 @@ class _SettingsTabState extends State<SettingsTab> {
           const SizedBox(height: 32),
 
           // Action Buttons
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () {
-                    setState(() {
-                      _speedValue = 1.0;
-                      _autoPlayVoice = true;
-                      context.read<ThemeController>().toggleTheme(false); // Default to light
-                    });
-                  },
-                  child: const Text('Reset to Default'),
-                ),
+          Center(
+            child: TextButton(
+              onPressed: () {
+                setState(() {
+                  _speedValue = 1.0;
+                  context.read<ThemeController>().toggleTheme(false); // Default to light
+                });
+              },
+              child: Text(
+                'Restablecer valores por defecto',
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Ajustes guardados')),
-                    );
-                  },
-                  child: const Text('Save Changes'),
-                ),
-              ),
-            ],
+            ),
           ),
           const SizedBox(height: 32),
         ],

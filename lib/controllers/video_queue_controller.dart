@@ -130,8 +130,12 @@ class VideoQueueController extends ChangeNotifier {
 
   void _finishSequence() {
     _isPlayingSequence = false;
-    _currentPlayer?.dispose();
-    _currentPlayer = null;
+    _currentIndex = _playlistClips.length - 1; // Mantener índice en la última palabra
+    
+    // NO destruimos _currentPlayer para que se quede estático en la pantalla
+    // _currentPlayer?.dispose(); 
+    // _currentPlayer = null;
+    
     _nextPlayer?.dispose();
     _nextPlayer = null;
     notifyListeners();

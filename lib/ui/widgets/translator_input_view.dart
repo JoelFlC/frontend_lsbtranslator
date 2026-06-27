@@ -47,7 +47,7 @@ class _TranslatorInputViewState extends State<TranslatorInputView> with SingleTi
   }
 
   void _onSpeechChange() {
-    if (_speechController!.isListening && _speechController!.recognizedText.isNotEmpty) {
+    if (_speechController!.recognizedText.isNotEmpty) {
       _textController.text = _speechController!.recognizedText;
     }
     
@@ -61,6 +61,11 @@ class _TranslatorInputViewState extends State<TranslatorInputView> with SingleTi
         } else {
           _pulseController.duration = const Duration(seconds: 2);
           _pulseController.repeat(reverse: true);
+          
+          // Auto-submit si hay texto cuando deja de escuchar
+          if (_textController.text.trim().isNotEmpty) {
+            _submitText(_textController.text);
+          }
         }
       });
     }
@@ -211,15 +216,6 @@ class _TranslatorInputViewState extends State<TranslatorInputView> with SingleTi
               Text(
                 'Frases Rápidas',
                 style: Theme.of(context).textTheme.titleMedium,
-              ),
-              TextButton(
-                onPressed: () {},
-                child: Row(
-                  children: [
-                    Text('Ver más', style: TextStyle(color: colorScheme.secondary)),
-                    Icon(Icons.chevron_right, size: 16, color: colorScheme.secondary),
-                  ],
-                ),
               ),
             ],
           ),

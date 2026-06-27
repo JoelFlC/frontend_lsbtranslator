@@ -19,7 +19,7 @@ class TranslatorPlayerView extends StatelessWidget {
         children: [
           // Video Container
           Container(
-            height: MediaQuery.of(context).size.height * 0.45,
+            height: MediaQuery.of(context).size.height * 0.75, // Aumentado para formato vertical
             decoration: BoxDecoration(
               color: colorScheme.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(24),
