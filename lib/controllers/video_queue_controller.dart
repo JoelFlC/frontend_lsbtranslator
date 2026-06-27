@@ -32,6 +32,9 @@ class VideoQueueController extends ChangeNotifier {
     await _playCurrentIndex();
   }
 
+  double _playbackSpeed = 1.0;
+  double get playbackSpeed => _playbackSpeed;
+
   Future<void> _playCurrentIndex() async {
     if (_currentIndex >= _playlistClips.length) {
       _finishSequence();
@@ -61,11 +64,41 @@ class VideoQueueController extends ChangeNotifier {
     }
 
     _currentPlayer!.addListener(_videoListener);
+    await _currentPlayer!.setPlaybackSpeed(_playbackSpeed); // Aplicar velocidad actual
     await _currentPlayer!.play();
     notifyListeners();
 
     // Precargar el SIGUIENTE video de forma asíncrona (no bloquea el frame actual)
     _preloadNext();
+  }
+
+  void cycleSpeed() {
+    if (_playbackSpeed == 1.0) {
+      _playbackSpeed = 1.5;
+    } else if (_playbackSpeed == 1.5) {
+      _playbackSpeed = 2.0;
+    } else if (_playbackSpeed == 2.0) {
+      _playbackSpeed = 0.5;
+    } else {
+      _playbackSpeed = 1.0;
+    }
+    _currentPlayer?.setPlaybackSpeed(_playbackSpeed);
+    notifyListeners();
+  }
+
+  void togglePlayPause() {
+    if (_currentPlayer == null) return;
+    if (_currentPlayer!.value.isPlaying) {
+      _currentPlayer!.pause();
+    } else {
+      _currentPlayer!.play();
+    }
+    notifyListeners();
+  }
+
+  Future<void> restartSequence() async {
+    if (_playlistClips.isEmpty) return;
+    await playSequence(List.from(_playlistClips));
   }
   
   Future<void> _preloadNext() async {

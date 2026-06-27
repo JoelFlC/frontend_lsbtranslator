@@ -226,13 +226,15 @@ class _TranslatorInputViewState extends State<TranslatorInputView> with SingleTi
           const SizedBox(height: 16),
           
           // Grid of Phrases
-          GridView.count(
+          GridView(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 1.5,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              mainAxisExtent: 130, // Aumentado a 130 para evitar overflow en web/textos largos
+            ),
             children: [
               QuickPhraseCard(
                 text: 'Buenos días, bienvenido.',

@@ -58,33 +58,51 @@ class TranslatorPlayerView extends StatelessWidget {
                 // LSB Activo Badge
                 Positioned(
                   top: 16,
-                  right: 16,
+                  left: 16,
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.9),
+                      color: colorScheme.surface.withValues(alpha: 0.8),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: colorScheme.outlineVariant),
                     ),
                     child: Row(
-                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Container(
                           width: 8,
                           height: 8,
                           decoration: BoxDecoration(
-                            color: colorScheme.tertiary, // Mint in dark mode, Teal in light mode
+                            color: colorScheme.secondary,
                             shape: BoxShape.circle,
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 6),
                         Text(
-                          'LSB Activo',
+                          'En vivo',
                           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: colorScheme.onSurface,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                ),
+
+                // Botón de Cerrar / Volver
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface.withValues(alpha: 0.8),
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: Icon(Icons.close, color: colorScheme.onSurface),
+                      tooltip: 'Cerrar y volver al inicio',
+                      onPressed: () {
+                        context.read<VideoQueueController>().stopAndClear();
+                        context.read<AppStateController>().setIdle();
+                      },
                     ),
                   ),
                 ),
@@ -101,37 +119,55 @@ class TranslatorPlayerView extends StatelessWidget {
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.replay_10, color: colorScheme.onSurfaceVariant),
-                    onPressed: () {},
-                  ),
-                  Container(
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      color: colorScheme.tertiary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: Icon(Icons.pause, color: colorScheme.onTertiary, size: 32),
-                      onPressed: () {
-                         context.read<VideoQueueController>().stopAndClear();
-                         context.read<AppStateController>().setIdle();
-                      },
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.speed, color: colorScheme.onSurfaceVariant),
-                    onPressed: () {},
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.loop, color: colorScheme.onSurfaceVariant),
-                    onPressed: () {},
-                  ),
-                ],
+              child: Consumer<VideoQueueController>(
+                builder: (context, queue, child) {
+                  final isPlaying = queue.currentPlayer?.value.isPlaying ?? false;
+                  final speed = queue.playbackSpeed;
+
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      // Botón Restart
+                      IconButton(
+                        icon: Icon(Icons.replay, color: colorScheme.onSurfaceVariant),
+                        onPressed: () {
+                          queue.restartSequence();
+                        },
+                      ),
+                      
+                      // Botón Play/Pause
+                      Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: colorScheme.tertiary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          icon: Icon(
+                            isPlaying ? Icons.pause : Icons.play_arrow, 
+                            color: colorScheme.onTertiary, 
+                            size: 32
+                          ),
+                          onPressed: () {
+                            queue.togglePlayPause();
+                          },
+                        ),
+                      ),
+                      
+                      // Botón Speed
+                      TextButton(
+                        onPressed: () {
+                          queue.cycleSpeed();
+                        },
+                        style: TextButton.styleFrom(
+                          foregroundColor: colorScheme.onSurfaceVariant,
+                        ),
+                        child: Text('${speed}x', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),
