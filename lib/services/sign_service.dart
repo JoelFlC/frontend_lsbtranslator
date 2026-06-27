@@ -85,7 +85,8 @@ class SignService {
       return [
         SignClip(
           conceptId: 'no_disponible',
-          videoUrl: 'assets/videos/no_disponible.mp4',
+          videoUrl:
+              'https://res.cloudinary.com/djtvg1k6l/video/upload/v1782567426/no_disponible_wggxtq.mp4',
           textEquivalent: 'Señal no disponible', // Requerido por tu modelo
         ),
       ];
