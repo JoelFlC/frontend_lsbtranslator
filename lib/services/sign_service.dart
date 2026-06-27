@@ -1,29 +1,35 @@
-import 'package:frontend_lsbtranslator/models/sign_clip.dart';
-
 import 'dart:convert';
-import 'dart:io';
 import 'package:http/http.dart' as http;
-import '../models/sign_clip.dart'; // Asumiendo que el modelo se llama así
+import 'package:frontend_lsbtranslator/models/sign_clip.dart'; // Import único y limpio
 
 class SignService {
-  // Tu URL de producción (HT-9)
-  static const String _functionUrl =
-      'https://translatetolsb-b5uu5qpcxq-uc.a.run.app';
+  // ATENCIÓN: Si cambiaste a un nuevo proyecto de Firebase, 
+  // pega aquí la NUEVA URL que te dio el despliegue.
+  static const String _functionUrl = 'https://translatetolsb-b5uu5qpcxq-uc.a.run.app';
 
-  // EL PLAN Z: JSON local de contingencia (HT-10)
+  // EL PLAN Z: JSON local de contingencia (Actualizado a la nueva BD)
   static const Map<String, List<Map<String, dynamic>>> _planZ = {
-    "pase a ventanilla": [
-      {"id": "pase", "video_url": "assets/videos/pase.mp4"},
-      {"id": "ventanilla", "video_url": "assets/videos/ventanilla.mp4"},
+    "buenos días como le puedo ayudar": [
+      { 
+        "id": "E6ZhdwJPaTSyBi06Sf1E", 
+        "videoUrl": "assets/videos/buenos_dias_ayudar.mp4",
+        "textEquivalent": "Buenos días como le puedo ayudar"
+      }
     ],
-    "su documento está incompleto": [
-      {"id": "documento", "video_url": "assets/videos/documento.mp4"},
-      {"id": "incompleto", "video_url": "assets/videos/incompleto.mp4"},
+    "por favor espere su turno": [
+      { 
+        "id": "HIN1uN1nTQADSdj9hkv1", 
+        "videoUrl": "assets/videos/espere_turno.mp4",
+        "textEquivalent": "Por favor espere su turno"
+      }
     ],
-    "tome turno": [
-      {"id": "tomar", "video_url": "assets/videos/tomar.mp4"},
-      {"id": "turno", "video_url": "assets/videos/turno.mp4"},
-    ],
+    "muchas gracias hasta luego": [
+      { 
+        "id": "HyhqPcmx6MTAPJpGKmWl", 
+        "videoUrl": "assets/videos/gracias_hasta_luego.mp4",
+        "textEquivalent": "Muchas gracias hasta luego"
+      }
+    ]
   };
 
   Future<List<SignClip>> translateText(String text) async {
@@ -31,32 +37,23 @@ class SignService {
 
     try {
       // 1. Intentar golpear el servidor orquestador
-      final response = await http
-          .post(
-            Uri.parse(_functionUrl),
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({'text': cleanText}),
-          )
-          .timeout(const Duration(seconds: 10)); // Timeout preventivo
+      final response = await http.post(
+        Uri.parse(_functionUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'text': cleanText}),
+      ).timeout(const Duration(seconds: 10)); // Timeout preventivo
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['success'] == true && data['clips'] != null) {
-          final clips = (data['clips'] as List)
+          return (data['clips'] as List)
               .map((clip) => SignClip.fromJson(clip))
-              .where((clip) => !clip.videoUrl.contains('ejemplo.com') && !clip.videoUrl.contains('fallback.mp4'))
               .toList();
-          
-          if (clips.isNotEmpty) {
-            return clips;
-          } else {
-            // Si todos los clips devueltos eran erróneos, forzamos caída al error
-            throw Exception('El servidor devolvió enlaces inválidos');
-          }
         }
       }
       // Si el servidor responde un error 500 o similar, forzamos caída al Plan Z
-      throw Exception('Error del servidor');
+      throw Exception('Error del servidor: ${response.statusCode}'); 
+
     } catch (e) {
       // 2. CONTINGENCIA: Si no hay internet o el servidor falla, entra el Plan Z
       print('=== ALERTA: Activando Plan Z de contingencia ===');
@@ -68,9 +65,14 @@ class SignService {
             .toList();
       }
 
-      // Si falla todo y la frase no está en el Plan Z, devolvemos una lista vacía
-      // para que el controlador dispare el estado de Error en la UI
-      return [];
+      // Si falla todo y la frase no está en el Plan Z, devolvemos un fallback seguro
+      return [
+        SignClip(
+          conceptId: 'no_disponible', 
+          videoUrl: 'assets/videos/no_disponible.mp4',
+          textEquivalent: 'Seña no disponible' // Requerido por tu modelo
+        )
+      ];
     }
   }
 }
