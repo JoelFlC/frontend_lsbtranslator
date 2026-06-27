@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_lsbtranslator/controllers/app_state_controller.dart';
+import 'package:frontend_lsbtranslator/controllers/video_queue_controller.dart';
 
 class SubtitleZone extends StatelessWidget {
   const SubtitleZone({super.key});
@@ -19,7 +20,8 @@ class SubtitleZone extends StatelessWidget {
             displayText = "Traduciendo: ${controller.currentText}...";
             break;
           case AppState.playing:
-            displayText = controller.currentText;
+            final queueController = context.watch<VideoQueueController>();
+            displayText = queueController.currentClip?.textEquivalent ?? controller.currentText;
             break;
         }
 

@@ -14,8 +14,8 @@ class TranslatorTab extends StatelessWidget {
 
     await appState.processText(text);
 
-    if (appState.currentVideoUrls.isNotEmpty) {
-      await videoQueue.playSequence(appState.currentVideoUrls);
+    if (appState.currentClips.isNotEmpty) {
+      await videoQueue.playSequence(appState.currentClips);
     }
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend_lsbtranslator/models/sign_clip.dart';
 import 'package:frontend_lsbtranslator/services/sign_service.dart';
 import 'package:frontend_lsbtranslator/utils/locator.dart';
 
@@ -7,13 +8,13 @@ enum AppState { idle, processing, playing }
 class AppStateController extends ChangeNotifier {
   AppState _currentState = AppState.idle;
   String _currentText = "";
-  List<String> _currentVideoUrls = [];
+  List<SignClip> _currentClips = [];
 
   final SignService _signService = locator<SignService>();
 
   AppState get currentState => _currentState;
   String get currentText => _currentText;
-  List<String> get currentVideoUrls => _currentVideoUrls;
+  List<SignClip> get currentClips => _currentClips;
 
   void setIdle() {
     _currentState = AppState.idle;
@@ -26,9 +27,9 @@ class AppStateController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setPlaying(List<String> urls) {
+  void setPlaying(List<SignClip> clips) {
     _currentState = AppState.playing;
-    _currentVideoUrls = urls;
+    _currentClips = clips;
     notifyListeners();
   }
 
@@ -38,9 +39,9 @@ class AppStateController extends ChangeNotifier {
     _setProcessing(text);
 
     try {
-      final urls = await _signService.translateTextToLsbUrls(text);
-      if (urls.isNotEmpty) {
-        setPlaying(urls);
+      final clips = await _signService.translateTextToSignClips(text);
+      if (clips.isNotEmpty) {
+        setPlaying(clips);
       } else {
         // Fallback si no hay traducciones
         setIdle();

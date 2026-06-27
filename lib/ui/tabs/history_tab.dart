@@ -12,8 +12,8 @@ class HistoryTab extends StatelessWidget {
 
     await appState.processText(text);
 
-    if (appState.currentVideoUrls.isNotEmpty) {
-      await videoQueue.playSequence(appState.currentVideoUrls);
+    if (appState.currentClips.isNotEmpty) {
+      await videoQueue.playSequence(appState.currentClips);
     }
   }
 
@@ -179,7 +179,7 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _PhraseItem extends StatelessWidget {
+class _PhraseItem extends StatefulWidget {
   final String text;
   final bool isGrey;
   final VoidCallback onPlay;
@@ -191,47 +191,73 @@ class _PhraseItem extends StatelessWidget {
   });
 
   @override
+  State<_PhraseItem> createState() => _PhraseItemState();
+}
+
+class _PhraseItemState extends State<_PhraseItem> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: isGrey 
-            ? (isDark ? colorScheme.surfaceContainerLow : colorScheme.surfaceContainerLow) 
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-        border: isGrey ? null : Border.all(color: colorScheme.outlineVariant),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              text,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface,
+    // Background color logic
+    Color baseColor = widget.isGrey 
+        ? colorScheme.surfaceContainerLow 
+        : Colors.transparent;
+    
+    Color hoverColor = isDark 
+        ? colorScheme.surfaceContainerHighest 
+        : colorScheme.surfaceContainerHigh;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          color: _isHovered ? hoverColor : baseColor,
+          borderRadius: BorderRadius.circular(12),
+          border: widget.isGrey 
+              ? Border.all(color: _isHovered ? colorScheme.outlineVariant : (isDark ? colorScheme.surfaceContainerHighest : colorScheme.surfaceContainerHigh)) 
+              : Border.all(color: _isHovered ? colorScheme.primary : colorScheme.outlineVariant),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: widget.onPlay,
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      widget.text,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: isDark ? colorScheme.surfaceContainerHighest : colorScheme.secondaryContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.play_arrow_outlined,
+                      color: isDark ? colorScheme.tertiary : colorScheme.onSecondaryContainer,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-          const SizedBox(width: 12),
-          InkWell(
-            onTap: onPlay,
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: isDark ? colorScheme.surfaceContainerHighest : colorScheme.secondaryContainer,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.play_arrow_outlined,
-                color: isDark ? colorScheme.tertiary : colorScheme.onSecondaryContainer,
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

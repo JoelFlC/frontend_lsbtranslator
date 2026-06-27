@@ -161,10 +161,11 @@ class TranslatorPlayerView extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Consumer<AppStateController>(
-                    builder: (context, controller, child) {
+                  Consumer2<AppStateController, VideoQueueController>(
+                    builder: (context, appState, queue, child) {
+                      final displayText = queue.currentClip?.textEquivalent ?? appState.currentText;
                       return Text(
-                        '"${controller.currentText}"',
+                        '"$displayText"',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           color: colorScheme.onSurface,
