@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend_lsbtranslator/controllers/app_state_controller.dart';
+import 'package:frontend_lsbtranslator/controllers/speech_controller.dart';
 import 'package:frontend_lsbtranslator/ui/widgets/quick_phrase_card.dart';
 import 'package:frontend_lsbtranslator/ui/theme/app_colors.dart';
 
@@ -19,6 +20,8 @@ class _TranslatorInputViewState extends State<TranslatorInputView> with SingleTi
   late Animation<double> _pulseAnimation;
   bool _isListening = false;
 
+  SpeechController? _speechController;
+
   @override
   void initState() {
     super.initState();
@@ -34,6 +37,43 @@ class _TranslatorInputViewState extends State<TranslatorInputView> with SingleTi
     _pulseController.repeat(reverse: true);
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_speechController == null) {
+      _speechController = context.read<SpeechController>();
+      _speechController!.addListener(_onSpeechChange);
+    }
+  }
+
+  void _onSpeechChange() {
+    if (_speechController!.isListening && _speechController!.recognizedText.isNotEmpty) {
+      _textController.text = _speechController!.recognizedText;
+    }
+    
+    final isListeningNow = _speechController!.isListening;
+    if (_isListening != isListeningNow) {
+      setState(() {
+        _isListening = isListeningNow;
+        if (_isListening) {
+          _pulseController.duration = const Duration(milliseconds: 500);
+          _pulseController.repeat(reverse: true);
+        } else {
+          _pulseController.duration = const Duration(seconds: 2);
+          _pulseController.repeat(reverse: true);
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _speechController?.removeListener(_onSpeechChange);
+    _pulseController.dispose();
+    _textController.dispose();
+    super.dispose();
+  }
+
   void _submitText(String text) {
     if (text.trim().isNotEmpty) {
       widget.onSubmit(text);
@@ -42,16 +82,12 @@ class _TranslatorInputViewState extends State<TranslatorInputView> with SingleTi
   }
 
   void _toggleListening() {
-    setState(() {
-      _isListening = !_isListening;
-      if (_isListening) {
-        _pulseController.duration = const Duration(milliseconds: 500);
-        _pulseController.repeat(reverse: true);
-      } else {
-        _pulseController.duration = const Duration(seconds: 2);
-        _pulseController.repeat(reverse: true);
-      }
-    });
+    if (_speechController!.isListening) {
+      _speechController!.stopListening();
+    } else {
+      _textController.clear();
+      _speechController!.startListening();
+    }
   }
 
   @override
@@ -225,10 +261,4 @@ class _TranslatorInputViewState extends State<TranslatorInputView> with SingleTi
     );
   }
 
-  @override
-  void dispose() {
-    _pulseController.dispose();
-    _textController.dispose();
-    super.dispose();
-  }
 }

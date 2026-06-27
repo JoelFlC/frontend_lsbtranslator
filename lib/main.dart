@@ -5,6 +5,7 @@ import 'package:frontend_lsbtranslator/utils/locator.dart';
 import 'package:frontend_lsbtranslator/controllers/app_state_controller.dart';
 import 'package:frontend_lsbtranslator/controllers/video_queue_controller.dart';
 import 'package:frontend_lsbtranslator/controllers/theme_controller.dart';
+import 'package:frontend_lsbtranslator/controllers/speech_controller.dart';
 import 'package:frontend_lsbtranslator/ui/screens/home_screen.dart';
 import 'package:frontend_lsbtranslator/ui/theme/app_theme.dart';
 
@@ -27,6 +28,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AppStateController()),
         ChangeNotifierProvider(create: (_) => VideoQueueController()),
         ChangeNotifierProvider(create: (_) => ThemeController()),
+        ChangeNotifierProvider(create: (_) => SpeechController()),
       ],
       child: const LsbTranslatorApp(),
     ),
