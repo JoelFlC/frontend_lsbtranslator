@@ -22,6 +22,8 @@ class AppStateController extends ChangeNotifier {
   }
 
   void _setProcessing(String text) {
+    // HT-9 Resuelto: Al cambiar a 'processing', la UI (el archivo principal)
+    // solo tiene que leer este estado para mostrar el CircularProgressIndicator (Spinner)
     _currentState = AppState.processing;
     _currentText = text;
     notifyListeners();
@@ -39,16 +41,20 @@ class AppStateController extends ChangeNotifier {
     _setProcessing(text);
 
     try {
-      final clips = await _signService.translateTextToSignClips(text);
+      // Ajusté el nombre del método para que coincida exactamente con el
+      // 'translateText' que definimos en el sign_service.dart (Plan Z)
+      final clips = await _signService.translateText(text);
+      
       if (clips.isNotEmpty) {
-        setPlaying(clips);
+        setPlaying(clips); // Comienza la reproducción de videos
       } else {
-        // Fallback si no hay traducciones
-        setIdle();
+        setIdle(); // Fallback si no hay traducciones
       }
     } catch (e) {
-      debugPrint("Error al procesar el texto: $e");
-      setIdle(); // Regresamos a idle en caso de error
+      debugPrint("Error fatal al procesar el texto: $e");
+      // Ojo: Si el error llega hasta aquí, significa que falló internet (HT-9)
+      // Y TAMBIÉN falló el Plan Z offline (HT-10). Devolvemos a idle para no bloquear la app.
+      setIdle(); 
     }
   }
 }

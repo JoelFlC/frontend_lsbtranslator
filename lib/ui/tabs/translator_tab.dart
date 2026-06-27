@@ -32,15 +32,25 @@ class TranslatorTab extends StatelessWidget {
   }
 
   Widget _buildCurrentView(BuildContext context, AppStateController controller) {
-    if (controller.currentState == AppState.idle || controller.currentState == AppState.processing) {
-      return TranslatorInputView(
-        key: const ValueKey('input_view'),
-        onSubmit: (text) => _handleProcessText(context, text),
-      );
-    } else {
-      return const TranslatorPlayerView(
-        key: ValueKey('player_view'),
+    // Si está en 'idle' o 'processing', mostramos la zona de entrada (o el spinner)
+    if (controller.currentState == AppState.processing) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(), // ¡Aquí está el spinner de la HT-9!
+            SizedBox(height: 20),
+            Text("Traduciendo con IA...", style: TextStyle(fontSize: 16)),
+          ],
+        ),
       );
     }
+    
+    if (controller.currentState == AppState.idle) {
+      return const TranslatorInputView();
+    }
+
+    // Si está en 'playing', mostramos el reproductor
+    return const TranslatorPlayerView();
   }
 }
