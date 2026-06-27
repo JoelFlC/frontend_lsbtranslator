@@ -3,33 +3,34 @@ import 'package:http/http.dart' as http;
 import 'package:frontend_lsbtranslator/models/sign_clip.dart'; // Import único y limpio
 
 class SignService {
-  // ATENCIÓN: Si cambiaste a un nuevo proyecto de Firebase, 
+  // ATENCIÓN: Si cambiaste a un nuevo proyecto de Firebase,
   // pega aquí la NUEVA URL que te dio el despliegue.
-  static const String _functionUrl = 'https://translatetolsb-b5uu5qpcxq-uc.a.run.app';
+  static const String _functionUrl =
+      'https://translatetolsb-b5uu5qpcxq-uc.a.run.app';
 
   // EL PLAN Z: JSON local de contingencia (Actualizado a la nueva BD)
   static const Map<String, List<Map<String, dynamic>>> _planZ = {
     "buenos días como le puedo ayudar": [
-      { 
-        "id": "E6ZhdwJPaTSyBi06Sf1E", 
+      {
+        "id": "E6ZhdwJPaTSyBi06Sf1E",
         "videoUrl": "assets/videos/buenos_dias_ayudar.mp4",
-        "textEquivalent": "Buenos días como le puedo ayudar"
-      }
+        "textEquivalent": "Buenos días como le puedo ayudar",
+      },
     ],
     "por favor espere su turno": [
-      { 
-        "id": "HIN1uN1nTQADSdj9hkv1", 
+      {
+        "id": "HIN1uN1nTQADSdj9hkv1",
         "videoUrl": "assets/videos/espere_turno.mp4",
-        "textEquivalent": "Por favor espere su turno"
-      }
+        "textEquivalent": "Por favor espere su turno",
+      },
     ],
     "muchas gracias hasta luego": [
-      { 
-        "id": "HyhqPcmx6MTAPJpGKmWl", 
+      {
+        "id": "HyhqPcmx6MTAPJpGKmWl",
         "videoUrl": "assets/videos/gracias_hasta_luego.mp4",
-        "textEquivalent": "Muchas gracias hasta luego"
-      }
-    ]
+        "textEquivalent": "Muchas gracias hasta luego",
+      },
+    ],
   };
 
   Future<List<SignClip>> translateText(String text) async {
@@ -37,23 +38,38 @@ class SignService {
 
     try {
       // 1. Intentar golpear el servidor orquestador
-      final response = await http.post(
-        Uri.parse(_functionUrl),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'text': cleanText}),
-      ).timeout(const Duration(seconds: 10)); // Timeout preventivo
+      final response = await http
+          .post(
+            Uri.parse(_functionUrl),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'text': cleanText}),
+          )
+          .timeout(const Duration(seconds: 10)); // Timeout preventivo
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['success'] == true && data['clips'] != null) {
-          return (data['clips'] as List)
-              .map((clip) => SignClip.fromJson(clip))
-              .toList();
+          // MAPEO BLINDADO A PRUEBA DE ERRORES
+          return (data['clips'] as List).map((clip) {
+            // 1. Limpiar la URL de comillas ocultas que causan el FormatException
+            final rawUrl = clip['videoUrl'] ?? '';
+            final cleanUrl = rawUrl
+                .replaceAll('"', '')
+                .replaceAll("'", "")
+                .trim();
+            //print(response.body);
+            // 2. Construir el modelo tolerando diferencias del backend
+            return SignClip(
+              conceptId: clip['id'] ?? clip['conceptId'] ?? 'desconocido',
+              videoUrl: cleanUrl,
+              // Fallback por si el back no manda el equivalente en texto
+              textEquivalent: clip['textEquivalent'] ?? clip['id'] ?? 'Señal',
+            );
+          }).toList();
         }
       }
       // Si el servidor responde un error 500 o similar, forzamos caída al Plan Z
-      throw Exception('Error del servidor: ${response.statusCode}'); 
-
+      throw Exception('Error del servidor: ${response.statusCode}');
     } catch (e) {
       // 2. CONTINGENCIA: Si no hay internet o el servidor falla, entra el Plan Z
       print('=== ALERTA: Activando Plan Z de contingencia ===');
@@ -68,10 +84,10 @@ class SignService {
       // Si falla todo y la frase no está en el Plan Z, devolvemos un fallback seguro
       return [
         SignClip(
-          conceptId: 'no_disponible', 
+          conceptId: 'no_disponible',
           videoUrl: 'assets/videos/no_disponible.mp4',
-          textEquivalent: 'Seña no disponible' // Requerido por tu modelo
-        )
+          textEquivalent: 'Señal no disponible', // Requerido por tu modelo
+        ),
       ];
     }
   }
