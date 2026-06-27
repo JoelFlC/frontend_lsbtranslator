@@ -42,9 +42,17 @@ class SignService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['success'] == true && data['clips'] != null) {
-          return (data['clips'] as List)
+          final clips = (data['clips'] as List)
               .map((clip) => SignClip.fromJson(clip))
+              .where((clip) => !clip.videoUrl.contains('ejemplo.com') && !clip.videoUrl.contains('fallback.mp4'))
               .toList();
+          
+          if (clips.isNotEmpty) {
+            return clips;
+          } else {
+            // Si todos los clips devueltos eran erróneos, forzamos caída al error
+            throw Exception('El servidor devolvió enlaces inválidos');
+          }
         }
       }
       // Si el servidor responde un error 500 o similar, forzamos caída al Plan Z
@@ -60,13 +68,9 @@ class SignService {
             .toList();
       }
 
-      // Si falla todo y la frase no está en el Plan Z, devolvemos un fallback
-      return [
-        SignClip(
-          conceptId: 'no_disponible',
-          videoUrl: 'assets/videos/no_disponible.mp4',
-        ),
-      ];
+      // Si falla todo y la frase no está en el Plan Z, devolvemos una lista vacía
+      // para que el controlador dispare el estado de Error en la UI
+      return [];
     }
   }
 }

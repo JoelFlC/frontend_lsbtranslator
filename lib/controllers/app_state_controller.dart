@@ -3,13 +3,14 @@ import 'package:frontend_lsbtranslator/models/sign_clip.dart';
 import 'package:frontend_lsbtranslator/services/sign_service.dart';
 import 'package:frontend_lsbtranslator/utils/locator.dart';
 
-enum AppState { idle, processing, playing }
+enum AppState { idle, processing, playing, error }
 
 class AppStateController extends ChangeNotifier {
   AppState _currentState = AppState.idle;
   String _currentText = "";
   List<SignClip> _currentClips = [];
   final List<String> _history = [];
+  String _errorMessage = "";
   
   final SignService _signService = locator<SignService>();
 
@@ -17,6 +18,7 @@ class AppStateController extends ChangeNotifier {
   String get currentText => _currentText;
   List<SignClip> get currentClips => _currentClips;
   List<String> get history => _history;
+  String get errorMessage => _errorMessage;
 
   void setIdle() {
     _currentState = AppState.idle;
@@ -24,8 +26,6 @@ class AppStateController extends ChangeNotifier {
   }
 
   void _setProcessing(String text) {
-    // HT-9 Resuelto: Al cambiar a 'processing', la UI (el archivo principal)
-    // solo tiene que leer este estado para mostrar el CircularProgressIndicator (Spinner)
     _currentState = AppState.processing;
     _currentText = text;
     notifyListeners();
@@ -35,6 +35,19 @@ class AppStateController extends ChangeNotifier {
     _currentState = AppState.playing;
     _currentClips = clips;
     notifyListeners();
+  }
+
+  void setError(String message) {
+    _currentState = AppState.error;
+    _errorMessage = message;
+    notifyListeners();
+    
+    // Regresar a idle automáticamente después de 3 segundos
+    Future.delayed(const Duration(seconds: 3), () {
+      if (_currentState == AppState.error) {
+        setIdle();
+      }
+    });
   }
 
   void _addToHistory(String text) {
@@ -54,20 +67,16 @@ class AppStateController extends ChangeNotifier {
     _setProcessing(text);
 
     try {
-      // Ajusté el nombre del método para que coincida exactamente con el
-      // 'translateText' que definimos en el sign_service.dart (Plan Z)
       final clips = await _signService.translateText(text);
       
       if (clips.isNotEmpty) {
-        setPlaying(clips); // Comienza la reproducción de videos
+        setPlaying(clips);
       } else {
-        setIdle(); // Fallback si no hay traducciones
+        setError("No se encontró una traducción para esta frase.");
       }
     } catch (e) {
       debugPrint("Error fatal al procesar el texto: $e");
-      // Ojo: Si el error llega hasta aquí, significa que falló internet (HT-9)
-      // Y TAMBIÉN falló el Plan Z offline (HT-10). Devolvemos a idle para no bloquear la app.
-      setIdle(); 
+      setError("No pudimos conectar con el servidor en este momento.");
     }
   }
 }
